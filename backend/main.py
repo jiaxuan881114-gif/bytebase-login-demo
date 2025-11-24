@@ -6,8 +6,8 @@ import os
 
 app = FastAPI(title="Bytebase User Management API")
 
-url: str = ("YOUR_SECRET_URL")
-key: str = "YOUR_SECRET_KEY"
+url: str = "https://gotqstxlcbtuafmffcia.supabase.co"
+key: str = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdvdHFzdHhsY2J0dWFmbWZmY2lhIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2Mzg5MTY1NywiZXhwIjoyMDc5NDY3NjU3fQ.WZ8nGY0plK283eHywNihleK5Id1D1EazNqGJbbpI40U" # 别泄露给前端，仅在后端使用
 supabase: Client = create_client(url, key)
 
 class DeleteRequest(BaseModel):
