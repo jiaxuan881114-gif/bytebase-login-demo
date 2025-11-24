@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bytebase Login Demo</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-color: #4f46e5; /* Indigo-600 */
+            --primary-hover: #4338ca; /* Indigo-700 */
+            --bg-gradient-start: #eef2ff;
+            --bg-gradient-end: #e0e7ff;
+            --text-main: #1f2937;
+            --text-sub: #6b7280;
+            --card-bg: #ffffff;
+            --border-color: #e5e7eb;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f3f4f6 0%, #e0e7ff 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            color: var(--text-main);
+        }
+
+        /* 卡片主体容器 */
+        .main-card {
+            background: var(--card-bg);
+            padding: 48px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 420px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* 顶部装饰条 */
+        .main-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, #4f46e5, #ec4899);
+        }
+
+        .logo-area {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .logo-text {
+            font-size: 24px;
+            font-weight: 700;
+            color: #111827;
+            letter-spacing: -0.5px;
+        }
+
+        .logo-sub {
+            margin-top: 8px;
+            font-size: 14px;
+            color: var(--text-sub);
+        }
+
+        /* 按钮样式组 */
+        .btn-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+            position: relative;
+        }
+
+        .btn img {
+            width: 20px;
+            height: 20px;
+            margin-right: 12px;
+        }
+
+        /* GitHub 按钮样式 */
+        .btn-github {
+            background-color: #24292f;
+            color: #ffffff;
+            border: 1px solid #24292f;
+        }
+        .btn-github:hover {
+            background-color: #111827;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        /* Google 按钮样式 */
+        .btn-google {
+            background-color: #ffffff;
+            color: #374151;
+            border: 1px solid var(--border-color);
+        }
+        .btn-google:hover {
+            background-color: #f9fafb;
+            border-color: #d1d5db;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        /* 登出按钮 */
+        .btn-logout {
+            margin-top: 24px;
+            background-color: #fee2e2;
+            color: #b91c1c;
+            border: 1px solid #fecaca;
+        }
+        .btn-logout:hover {
+            background-color: #fecaca;
+        }
+
+        /* 用户资料卡片 */
+        .profile-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .avatar {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            border: 2px solid #e0e7ff;
+            margin-right: 16px;
+            object-fit: cover;
+        }
+
+        .user-info h3 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 600;
+            color: #111827;
+        }
+
+        .user-info p {
+            margin: 4px 0 0 0;
+            font-size: 14px;
+            color: var(--text-sub);
+        }
+
+        .data-label {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: var(--text-sub);
+            margin-bottom: 8px;
+            display: block;
+            margin-top: 16px;
+        }
+
+        /* 终端风格的代码块 */
+        .code-block {
+            background: #1e293b; /* Slate-800 */
+            color: #e2e8f0;
+            padding: 16px;
+            border-radius: 8px;
+            font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+            font-size: 12px;
+            overflow-x: auto;
+            line-height: 1.5;
+            border: 1px solid #334155;
+        }
+
+        .hidden { display: none; }
+
+        /* 简单的加载动画 */
+        .loading {
+            color: var(--text-sub);
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-card" id="login-container">
+        <div class="logo-area">
+            <div class="logo-text">Bytebase Demo</div>
+            <div class="logo-sub">Sign in to manage your account</div>
+        </div>
+
+        <div class="btn-group">
+            <button class="btn btn-github" onclick="signInWithProvider('github')">
+                <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark-Light-64px.png" alt="GitHub">
+                Continue with GitHub
+            </button>
+
+            <button class="btn btn-google" onclick="signInWithProvider('google')">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google">
+                Continue with Google
+            </button>
+        </div>
+    </div>
+
+    <div class="main-card hidden" id="profile-container">
+        <div class="profile-header">
+            <img id="avatar" class="avatar" src="" alt="Avatar">
+            <div class="user-info">
+                <h3 id="username">Loading...</h3>
+                <p id="email">...</p>
+            </div>
+        </div>
+
+        <span class="data-label">User ID (UUID)</span>
+        <div class="code-block" style="background: #f1f5f9; color: #475569; border-color: #e2e8f0; padding: 10px;">
+            <span id="userid"></span>
+        </div>
+
+        <span class="data-label">Raw Metadata</span>
+        <div class="code-block" id="raw-json"></div>
+
+        <button class="btn btn-logout" onclick="signOut()">Sign Out</button>
+    </div>
+
+    <script>
+        const supabaseUrl = 'https://gotqstxlcbtuafmffcia.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdvdHFzdHhsY2J0dWFmbWZmY2lhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM4OTE2NTcsImV4cCI6MjA3OTQ2NzY1N30.c4px5-saOw8MZvfviAg7bKoUxtFcTPspjJ00Yn9Y72s';
+        // ==========================================
+
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+        // 登录
+        async function signInWithProvider(provider) {
+            const { data, error } = await supabase.auth.signInWithOAuth({
+                provider: provider,
+                options: {
+                    redirectTo: window.location.href
+                }
+            });
+            if (error) alert('Login failed: ' + error.message);
+        }
+
+        // 登出
+        async function signOut() {
+            const { error } = await supabase.auth.signOut();
+            if (!error) window.location.reload();
+        }
+
+        // 状态检查与UI渲染
+        async function checkUser() {
+            // 获取 Session
+            const { data: { session } } = await supabase.auth.getSession();
+
+            if (session) {
+                const user = session.user;
+
+                // 切换界面
+                document.getElementById('login-container').classList.add('hidden');
+                document.getElementById('profile-container').classList.remove('hidden');
+
+                // 填充数据
+                const avatarUrl = user.user_metadata.avatar_url || user.user_metadata.picture;
+                const fullName = user.user_metadata.full_name || user.user_metadata.name || 'Bytebase User';
+
+                document.getElementById('avatar').src = avatarUrl;
+                document.getElementById('username').innerText = fullName;
+                document.getElementById('email').innerText = user.email;
+                document.getElementById('userid').innerText = user.id;
+                document.getElementById('raw-json').innerText = JSON.stringify(user.user_metadata, null, 2);
+            }
+        }
+
+        // 初始化
+        checkUser();
+    </script>
+</body>
+</html>

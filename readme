@@ -1,0 +1,6 @@
+bytebase-submit/
+├── index.html          (前端入口)
+├── README.md           (项目说明)
+└── backend/            (后端目录)
+    ├── main.py
+    └── requirements.txt
